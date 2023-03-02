@@ -1,11 +1,8 @@
 package com.example.giphy.model
 
 data class Data(
-    val analytics: Analytics,
-    val analytics_response_payload: String,
     val bitly_gif_url: String,
     val bitly_url: String,
-    val content_url: String,
     val embed_url: String,
     val id: String,
     val images: Images,
