@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.giphy.model.gropieItem.GifItem
+import com.example.giphy.model.groupieItem.GifItem
 import com.example.giphy.repository.GiphyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +15,7 @@ import javax.inject.Inject
 class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRepository): ViewModel(){
 
     private val _isStringEmpty = MutableLiveData<Boolean>()
+    //оберни LiveData в Result по аналогии с YouTrader
     val isStringEmpty: LiveData<Boolean>
         get() = _isStringEmpty
 
@@ -22,9 +23,13 @@ class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRep
     val gifItems: LiveData<List<GifItem>>
         get() = _gifItems
 
+    private val _navigateToSelectedGif = MutableLiveData<GifItem?>()
+    val navigateToSelectedPGif: LiveData<GifItem?>
+        get() = _navigateToSelectedGif
+
     private fun getGifItems(keyword: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _gifItems.postValue(giphyRepository.getGifs(keyword).body()!!.data.map { GifItem(it.images) })
+            _gifItems.postValue(giphyRepository.getGifs(keyword).body()?.data?.map { GifItem(it.images) })
         }
     }
 
@@ -34,5 +39,13 @@ class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRep
         else {
             getGifItems(inputString)
         }
+    }
+
+    fun displayGifDetails(item: GifItem) {
+        _navigateToSelectedGif.value = item
+    }
+
+    fun displayGifDetailsComplete() {
+        _navigateToSelectedGif.value = null
     }
 }

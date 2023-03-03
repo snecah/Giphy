@@ -13,7 +13,7 @@ data class Data(
     val source: String,
     val source_post_url: String,
     val source_tld: String,
-    val title: String,
+    val title: String?,
     val trending_datetime: String,
     val type: String,
     val url: String,

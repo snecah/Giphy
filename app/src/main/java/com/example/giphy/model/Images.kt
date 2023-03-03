@@ -1,9 +1,11 @@
 package com.example.giphy.model
 
+import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 data class Images(
-    val `480w_still`: WStill,
     val downsized: Downsized,
-    val downsized_large: DownsizedLarge,
+    @SerializedName("downsized_large")
+    val downsizedLarge: DownsizedLarge,
     val downsized_medium: DownsizedMedium,
     val downsized_small: DownsizedSmall,
     val downsized_still: DownsizedStill,
@@ -25,4 +27,4 @@ data class Images(
     val preview: Preview,
     val preview_gif: PreviewGif,
     val preview_webp: PreviewWebp
-)
+):Serializable
