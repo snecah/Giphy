@@ -12,12 +12,12 @@ import androidx.navigation.fragment.findNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.example.giphy.R
 import com.example.giphy.databinding.FragmentAllGifsBinding
+import com.example.giphy.exceptions.ScreenStateException
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import com.example.giphy.model.Result
-import kotlinx.android.synthetic.main.fragment_all_gifs.*
 
 
 @AndroidEntryPoint
@@ -48,8 +48,8 @@ class AllGifsFragment : Fragment(R.layout.fragment_all_gifs) {
             )
         }
 
-        viewModel.screenState.observe(viewLifecycleOwner) {screenState ->
-            when(screenState) {
+        viewModel.screenState.observe(viewLifecycleOwner) { screenState ->
+            when (screenState) {
                 is Result.Success -> {
                     adapter.update(screenState.data)
                     binding.recyclerView.visibility = View.VISIBLE
@@ -58,30 +58,30 @@ class AllGifsFragment : Fragment(R.layout.fragment_all_gifs) {
                     binding.recyclerView.visibility = View.VISIBLE
                 }
                 is Result.Error -> {
-                    Toast.makeText(requireContext(), screenState.exception.message, Toast.LENGTH_LONG).show()
+                    val errorMessage = when(screenState.exception) {
+                        is ScreenStateException.EmptyInputException -> {
+                            requireContext().getString(R.string.empty_input_message)
+                        }
+
+                        is ScreenStateException.NoResultsException -> {
+                            requireContext().getString(R.string.no_result_message)
+                        }
+
+                        else -> {
+                            screenState.exception.message
+                        }
+                    }
+                    Toast.makeText(
+                        requireContext(),
+                        errorMessage,
+                        Toast.LENGTH_LONG
+                    ).show()
                     adapter.clear()
                     binding.recyclerView.visibility = View.GONE
                     screenState.exception.message?.let { Log.d(TAG, it) }
-            }
+                }
             }
         }
-
-
-        //сделай, чтобы из ViewModel торчала одна LiveData, а не несколько, подписывайся на нее(ScreenState) и в зависимости от него отрисовывай UI
-//        viewModel.isStringEmpty.observe(viewLifecycleOwner) {
-//            if (it == true)
-//                Toast.makeText(requireContext(), "Input must be nonempty", Toast.LENGTH_LONG).show()
-//        }
-//
-//        viewModel.gifItems.observe(viewLifecycleOwner) {
-//            adapter.update(it)
-//        }
-//
-//        viewModel.isDataEmpty.observe(viewLifecycleOwner) {
-//            if (it == true)
-//                Toast.makeText(requireContext(), "Your search \"${binding.searchEditText.text}\" did not match any GIFs", Toast.LENGTH_LONG)
-//                    .show()
-//        }
     }
 
     private fun onPerformSearchAction(searchQuery: String, actionId: Int) {
@@ -89,6 +89,7 @@ class AllGifsFragment : Fragment(R.layout.fragment_all_gifs) {
             viewModel.checkStringAndGetItems(searchQuery)
         }
     }
+
     companion object {
         private const val TAG = "AllGifsFragment"
     }

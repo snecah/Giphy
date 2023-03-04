@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.giphy.exceptions.ScreenStateException
 import com.example.giphy.model.Data
 import com.example.giphy.model.Images
 import com.example.giphy.model.groupieItem.GifItem
@@ -20,7 +21,7 @@ class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRep
     ViewModel() {
 
     private val _screenState = MutableLiveData<Result<List<GifItem>>>()
-    val screenState:LiveData<Result<List<GifItem>>> = _screenState
+    val screenState: LiveData<Result<List<GifItem>>> = _screenState
 
     private var gifGroupieItems: List<GifItem> = listOf()
     var selectedGifData: Data? = null
@@ -32,16 +33,14 @@ class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRep
     private fun getGifItem(keyword: String) {
         viewModelScope.launch {
             _screenState.value = Result.Loading
-            giphyRepository.getGifs(keyword).catch {error ->
-                _screenState.value =  Result.Error(error)
+            giphyRepository.getGifs(keyword).catch { error ->
+                _screenState.value = Result.Error(error)
             }.collect { generalData ->
                 val gifsData = generalData?.gifsData
                 allGifsData = gifsData
                 if (gifsData.isNullOrEmpty()) {
-                    _screenState.value =
-                        Result.Error(InputStringException("Your search did not match any gifs"))
-                }
-                else {
+                    _screenState.value = Result.Error(ScreenStateException.NoResultsException())
+                } else {
                     gifGroupieItems = gifsData.map {
                         GifItem(it.images, onGifItemClickedAction())
                     }
@@ -52,8 +51,8 @@ class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRep
     }
 
     fun checkStringAndGetItems(inputString: String) {
-        if (inputString == "")
-            _screenState.value = Result.Error(InputStringException("Input must be nonempty"))
+        if (inputString.isEmpty())
+            _screenState.value = Result.Error(ScreenStateException.EmptyInputException())
         else {
             getGifItem(inputString)
         }
@@ -73,6 +72,4 @@ class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRep
         }
         return null
     }
-
-    private class InputStringException(message: String): Exception(message)
 }

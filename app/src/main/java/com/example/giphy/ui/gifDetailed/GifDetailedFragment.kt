@@ -2,7 +2,6 @@ package com.example.giphy.ui.gifDetailed
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
@@ -17,13 +16,21 @@ class GifDetailedFragment : Fragment(R.layout.fragment_gif_detailed) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val args = GifDetailedFragmentArgs.fromBundle(requireArguments())
-        Glide.with(view.context).load(args.gifImage.original.url)
-            .placeholder(R.drawable.loading_animation).error(R.drawable.ic_broken_image).into(binding.gifImageDetailed)
+        Glide.with(view.context)
+            .load(args.gifImage.original.url)
+            .placeholder(R.drawable.loading_animation)
+            .error(R.drawable.ic_broken_image)
+            .into(binding.gifImageDetailed)
+
         with(binding) {
-            gifTitle.text = "Gif's title: ${args.selectedGifData?.title}"
-            gifRating.text = "Rating: ${args.selectedGifData?.rating}"
-            gifDate.text = "Creation date:  ${args.selectedGifData?.importDatetime}"
+            val gifTitleText = args.selectedGifData?.title
+            gifTitle.text = if(!gifTitleText.isNullOrEmpty()) {
+                requireContext().getString(R.string.gif_title, args.selectedGifData?.title)
+            } else {
+                requireContext().getString(R.string.no_title)
+            }
+            gifRating.text = requireContext().getString(R.string.gif_rating, args.selectedGifData?.rating)
+            gifDate.text = requireContext().getString(R.string.gif_date, args.selectedGifData?.importDatetime)
         }
     }
-
 }
