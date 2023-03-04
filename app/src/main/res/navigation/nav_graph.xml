@@ -26,5 +26,9 @@
         <argument
             android:name="gifImage"
             app:argType="com.example.giphy.model.Images" />
+        <argument
+            android:name="selectedGifData"
+            app:argType="com.example.giphy.model.Data"
+            app:nullable="true" />
     </fragment>
 </navigation>

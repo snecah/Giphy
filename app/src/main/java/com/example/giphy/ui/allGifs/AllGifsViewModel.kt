@@ -4,32 +4,56 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.giphy.model.Data
+import com.example.giphy.model.GeneralData
+import com.example.giphy.model.Images
 import com.example.giphy.model.groupieItem.GifItem
 import com.example.giphy.repository.GiphyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRepository): ViewModel(){
+class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRepository) :
+    ViewModel() {
 
-    private val _isStringEmpty = MutableLiveData<Boolean>()
     //оберни LiveData в Result по аналогии с YouTrader
+    private val _isStringEmpty = MutableLiveData<Boolean>()
     val isStringEmpty: LiveData<Boolean>
         get() = _isStringEmpty
+
+    private val _isDataEmpty = MutableLiveData<Boolean>()
+    val isDataEmpty: LiveData<Boolean>
+        get() = _isDataEmpty
+
+    var selectedGifData: Data? = null
+
+    private var allGifsData: List<Data>? = listOf()
 
     private val _gifItems = MutableLiveData<List<GifItem>>()
     val gifItems: LiveData<List<GifItem>>
         get() = _gifItems
 
-    private val _navigateToSelectedGif = MutableLiveData<GifItem?>()
-    val navigateToSelectedPGif: LiveData<GifItem?>
-        get() = _navigateToSelectedGif
+    val onNavigateToSelectedGifEvent = Channel<Images>()
 
     private fun getGifItems(keyword: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _gifItems.postValue(giphyRepository.getGifs(keyword).body()?.data?.map { GifItem(it.images) })
+            val gifsData = giphyRepository.getGifs(keyword).body()?.data
+            if (gifsData.isNullOrEmpty())
+                _isDataEmpty.postValue(true)
+            else {
+                _isDataEmpty.postValue(false)
+                allGifsData = gifsData
+                _gifItems.postValue(
+                    gifsData.map {
+                        GifItem(
+                            it.images,
+                            onGifItemClickedAction()
+                        )
+                    })
+            }
         }
     }
 
@@ -41,11 +65,18 @@ class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRep
         }
     }
 
-    fun displayGifDetails(item: GifItem) {
-        _navigateToSelectedGif.value = item
+    private fun onGifItemClickedAction(): (Images) -> Unit = { selectedImage ->
+        selectedGifData = findDataByGif(selectedImage)
+        viewModelScope.launch {
+            onNavigateToSelectedGifEvent.send(selectedImage)
+        }
     }
 
-    fun displayGifDetailsComplete() {
-        _navigateToSelectedGif.value = null
+    private fun findDataByGif(selectedImage: Images): Data? {
+        allGifsData?.forEach {
+            if (it.images == selectedImage)
+                return it
+        }
+        return null
     }
 }

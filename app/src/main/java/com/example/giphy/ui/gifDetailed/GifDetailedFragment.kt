@@ -19,6 +19,11 @@ class GifDetailedFragment : Fragment(R.layout.fragment_gif_detailed) {
         val args = GifDetailedFragmentArgs.fromBundle(requireArguments())
         Glide.with(view.context).load(args.gifImage.original.url)
             .placeholder(R.drawable.loading_animation).error(R.drawable.ic_broken_image).into(binding.gifImageDetailed)
+        with(binding) {
+            gifTitle.text = "Gif's title: ${args.selectedGifData?.title}"
+            gifRating.text = "Rating: ${args.selectedGifData?.rating}"
+            gifDate.text = "Creation date:  ${args.selectedGifData?.importDatetime}"
+        }
     }
 
 }

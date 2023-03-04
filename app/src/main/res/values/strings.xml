@@ -4,4 +4,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="type_keyword">type keyword</string>
     <string name="search">search</string>
+    <string name="title">title</string>
+    <string name="creation_date">creation date</string>
+    <string name="rating">rating</string>
 </resources>
