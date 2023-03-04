@@ -5,63 +5,57 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.giphy.model.Data
-import com.example.giphy.model.GeneralData
 import com.example.giphy.model.Images
 import com.example.giphy.model.groupieItem.GifItem
 import com.example.giphy.repository.GiphyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.giphy.model.Result
+import kotlinx.coroutines.flow.catch
 
 @HiltViewModel
 class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRepository) :
     ViewModel() {
 
-    //оберни LiveData в Result по аналогии с YouTrader
-    private val _isStringEmpty = MutableLiveData<Boolean>()
-    val isStringEmpty: LiveData<Boolean>
-        get() = _isStringEmpty
+    private val _screenState = MutableLiveData<Result<List<GifItem>>>()
+    val screenState:LiveData<Result<List<GifItem>>> = _screenState
 
-    private val _isDataEmpty = MutableLiveData<Boolean>()
-    val isDataEmpty: LiveData<Boolean>
-        get() = _isDataEmpty
-
+    private var gifGroupieItems: List<GifItem> = listOf()
     var selectedGifData: Data? = null
-
     private var allGifsData: List<Data>? = listOf()
 
-    private val _gifItems = MutableLiveData<List<GifItem>>()
-    val gifItems: LiveData<List<GifItem>>
-        get() = _gifItems
 
     val onNavigateToSelectedGifEvent = Channel<Images>()
 
-    private fun getGifItems(keyword: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val gifsData = giphyRepository.getGifs(keyword).body()?.data
-            if (gifsData.isNullOrEmpty())
-                _isDataEmpty.postValue(true)
-            else {
-                _isDataEmpty.postValue(false)
+    private fun getGifItem(keyword: String) {
+        viewModelScope.launch {
+            _screenState.value = Result.Loading
+            giphyRepository.getGifs(keyword).catch {error ->
+                _screenState.value =  Result.Error(error)
+            }.collect { generalData ->
+                val gifsData = generalData?.gifsData
                 allGifsData = gifsData
-                _gifItems.postValue(
-                    gifsData.map {
-                        GifItem(
-                            it.images,
-                            onGifItemClickedAction()
-                        )
-                    })
+                if (gifsData.isNullOrEmpty()) {
+                    _screenState.value =
+                        Result.Error(InputStringException("Your search did not match any gifs"))
+                }
+                else {
+                    gifGroupieItems = gifsData.map {
+                        GifItem(it.images, onGifItemClickedAction())
+                    }
+                    _screenState.value = Result.Success(gifGroupieItems)
+                }
             }
         }
     }
 
     fun checkStringAndGetItems(inputString: String) {
         if (inputString == "")
-            _isStringEmpty.value = true
+            _screenState.value = Result.Error(InputStringException("Input must be nonempty"))
         else {
-            getGifItems(inputString)
+            getGifItem(inputString)
         }
     }
 
@@ -79,4 +73,6 @@ class AllGifsViewModel @Inject constructor(private val giphyRepository: GiphyRep
         }
         return null
     }
+
+    private class InputStringException(message: String): Exception(message)
 }

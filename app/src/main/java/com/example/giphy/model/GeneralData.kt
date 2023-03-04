@@ -1,7 +1,10 @@
 package com.example.giphy.model
 
+import com.google.gson.annotations.SerializedName
+
 data class GeneralData(
-    val `data`: List<Data>,
+    @SerializedName("data")
+    val gifsData: List<Data>,
     val meta: Meta,
     val pagination: Pagination
 )

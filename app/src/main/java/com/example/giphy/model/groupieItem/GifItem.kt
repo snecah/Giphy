@@ -4,11 +4,10 @@ import android.view.View
 import com.bumptech.glide.Glide
 import com.example.giphy.R
 import com.example.giphy.databinding.GifItemBinding
-import com.example.giphy.model.Data
 import com.example.giphy.model.Images
 import com.xwray.groupie.viewbinding.BindableItem
 
-class GifItem(val gifImageData: Images, val onGifItemClicked: (Images) -> Unit) :
+class GifItem(private val gifImageData: Images, val onGifItemClicked: (Images) -> Unit) :
     BindableItem<GifItemBinding>() {
 
     override fun getLayout(): Int = R.layout.gif_item
