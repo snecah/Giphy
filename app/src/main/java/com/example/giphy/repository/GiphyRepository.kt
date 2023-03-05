@@ -10,9 +10,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GiphyRepository @Inject constructor(private val giphyApi: GiphyApi){
+class GiphyRepository @Inject constructor(private val giphyApi: GiphyApi) {
 
     suspend fun getGifs(keyword: String): Flow<GeneralData?> = flow {
-        emit(giphyApi.getGifs(keyword).body())
+        emit(giphyApi.getGifs(keyword))
     }.flowOn(Dispatchers.IO)
 }

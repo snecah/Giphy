@@ -1,8 +1,3 @@
 package com.example.giphy.model
 
-data class DownsizedLarge(
-    val height: String,
-    val size: String,
-    val url: String,
-    val width: String
-)
+data class DownsizedLarge(val url: String)

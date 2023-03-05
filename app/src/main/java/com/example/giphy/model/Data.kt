@@ -9,4 +9,5 @@ data class Data(
     @SerializedName("import_datetime")
     val importDatetime: String,
     val rating: String,
-    val title: String?): Serializable
+    val title: String?
+) : Serializable

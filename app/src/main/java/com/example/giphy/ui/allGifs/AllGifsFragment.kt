@@ -58,7 +58,7 @@ class AllGifsFragment : Fragment(R.layout.fragment_all_gifs) {
                     binding.recyclerView.visibility = View.VISIBLE
                 }
                 is Result.Error -> {
-                    val errorMessage = when(screenState.exception) {
+                    val errorMessage = when (screenState.exception) {
                         is ScreenStateException.EmptyInputException -> {
                             requireContext().getString(R.string.empty_input_message)
                         }

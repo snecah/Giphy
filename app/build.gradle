@@ -100,4 +100,10 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.1.1'
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
 
+    def hamcrestVersion = '1.3'
+    testImplementation "org.hamcrest:hamcrest-all:$hamcrestVersion"
+
+    def coroutinesTestVersion = '1.3.6'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesTestVersion"
+
 }

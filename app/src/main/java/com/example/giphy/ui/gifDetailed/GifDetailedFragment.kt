@@ -24,13 +24,15 @@ class GifDetailedFragment : Fragment(R.layout.fragment_gif_detailed) {
 
         with(binding) {
             val gifTitleText = args.selectedGifData?.title
-            gifTitle.text = if(!gifTitleText.isNullOrEmpty()) {
+            gifTitle.text = if (!gifTitleText.isNullOrEmpty()) {
                 requireContext().getString(R.string.gif_title, args.selectedGifData?.title)
             } else {
                 requireContext().getString(R.string.no_title)
             }
-            gifRating.text = requireContext().getString(R.string.gif_rating, args.selectedGifData?.rating)
-            gifDate.text = requireContext().getString(R.string.gif_date, args.selectedGifData?.importDatetime)
+            gifRating.text =
+                requireContext().getString(R.string.gif_rating, args.selectedGifData?.rating)
+            gifDate.text =
+                requireContext().getString(R.string.gif_date, args.selectedGifData?.importDatetime)
         }
     }
 }
